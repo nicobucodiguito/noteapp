@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import sys
 import signal
 from pick import pick # https://github.com/wong2/pick
 
@@ -14,16 +15,13 @@ def cls(): # Clear console, if OS is Windows, use 'cls' else use 'clear' - https
     os.system('cls' if os.name=='nt' else 'clear')
 
 def mainMenu(): # Main menu
-    options = ["Show notes", "New note", "Modify existing note", "Exit"]
-    option, index = pick(options)
+    options = ["Show all notes", "New note", "Modify existing note", "Exit"]
+    option, index = pick(options, indicator="> ")
     cls()
     match index:
         case 0:
             id = mostrarNotas() # This function should return an ID from the selected note, then provide another option menu to either
             subMenuNote(id)
-            # TODO: Submenu for individual note to either
-            # Modify, delete (based on the ID previously collected) or go back
-            # Should ask for confirmation
         case 1:
             cargarNota()
             mainMenu()
@@ -36,13 +34,14 @@ def mainMenu(): # Main menu
 
 def subMenuNote(id):
     options = ["Modify note", "Delete note", "Back"]
-    option, index = pick(options)
+    option, index = pick(options, indicator="> ")
     match index:
         case 0:
             modificarNota(id)
             mainMenu()
         case 1:
-            ...
+            eliminarNota(id)
+            mainMenu()
         case 2:
             mainMenu()
 
@@ -54,24 +53,38 @@ def cargarNota(): # Writes a new entry with an automatically assigned ID
     text = input("New note - ")
     dbCursor.execute("INSERT INTO notes (text) VALUES (?)", [text])
 
-def eliminarNota(): # Removes a row matching by ID
-    id = int(input("ID: "))
-    dbCursor.execute(f"DELETE FROM notes WHERE id = {id}")
-
 def modificarNota(id): # Modifies a row's text field with a given ID
     print(GREEN + f'Modifying: "{returnQueryText(id)}"' + RESET)
     newText = input("New content - ")
     dbCursor.execute("UPDATE notes SET text = ? WHERE id = ?", (newText, id))
+
+def eliminarNota(id): # Removes a row matching by ID
+    option = ""
+    print("Are you sure you want to delete this note? [Y/N]\n", GREEN + f'"{returnQueryText(id)}"' + RESET)
+    options = ["Y", "N"]
+    #while option != "N" and option != "Y":
+    while option not in options:
+        option = input("> ").upper()
+        if option != "N" and option != "Y":
+            print("Please choose [Y/N]")
+    if option == "N":
+        subMenuNote(id)
+    elif option == "Y":
+        dbCursor.execute(f"DELETE FROM notes WHERE id = {id}")
 
 def mostrarNotas(): # Displays all the notes available
     notas = dbCursor.execute("SELECT * FROM notes")
     options = [] # Create two lists, one with the options and another one with the DB ID so we can match indexes and get the ID data for later
     ids = [] # This is done because the pick() library can only work with lists, not dictionaries.
     for nota in notas:
-        options.append(nota[1])
         ids.append(nota[0])
-    option, index = pick(options)
-    return ids[index] # Returns the DB ID of the selected note for later
+        options.append(f"- {nota[1]}")
+    options.append("Go to Main Menu")
+    option, index = pick(options, indicator="> ")
+    if option == "Go to Main Menu":
+        mainMenu()
+    else:
+        return ids[index] # Returns the DB ID of the selected note for later
 
 def handler(signum, frame):
     print('Signal handler called with signal', signum)
@@ -79,6 +92,7 @@ def handler(signum, frame):
 def exit():
     dbConnection.commit()
     dbConnection.close()
+    sys.exit()
 
 try:
     signal.signal(signal.SIGTSTP, signal.SIG_IGN) # Ignores CTRL-Z
