@@ -120,19 +120,7 @@ def exit(): # Exists the program commiting all the changes done to the DB.
     cls()
     dbConnection.commit()
     dbConnection.close()
-    cs50()
     sys.exit()
-
-def cs50():
-    print("Goodbye! Thank you " + YELLOW + "CS50" + RESET + " for everything!" + RED + " <3" + RESET)
-    time.sleep(2)
-    cls()
-    print("Please look forward to my future projects!")
-    time.sleep(2)
-    cls()
-    print("Bye!!")
-    time.sleep(2)
-    cls()
 
 if __name__ == "__main__":
     dbConnection = sqlite3.connect("notes.db", timeout=5) # Connection to the DB
