@@ -22,7 +22,7 @@ def mainMenu(): # Main menu
     cls()
     match index:
         case 0:
-            id = showNotes() # This function should return an ID from the selected note, then provide another option menu to either
+            id = showNotes()
             subMenuNote(id)
         case 1:
             newNote()
@@ -51,7 +51,7 @@ def subMenuNote(id):
         case 3:
             mainMenu()
 
-def markNoteDone(id):
+def markNoteDone(id): # Changes the state of a note to done/undone depending on its current state
     s = dbCursor.execute(f"SELECT state FROM notes WHERE id = {id}")
     s = s.fetchone()[0]
     if s == 0:
@@ -63,7 +63,7 @@ def markNoteDone(id):
         text = text.fetchone()[0]
         dbCursor.execute("UPDATE notes SET text = ?, state = ? WHERE id = ?", (text, 0, id))
 
-def returnQueryText(id): # Returns an individual string from the "text" field matching an ID.
+def returnQueryText(id): # Returns an individual string from the "text" field matching an ID
     n = dbCursor.execute(f"SELECT text FROM notes WHERE id = {id}")
     return n.fetchone()[0]
 
@@ -104,8 +104,8 @@ def showNotes(): # Displays all the notes available
     ids = [] # This is done because the pick() library can only work with lists, not dictionaries.
     for nota in notas:
         ids.append(nota[0])
-        if nota[2] == 0:
-            options.append(f"□ {nota[1]}")
+        if nota[2] == 0: # If the note state is 0, it is processed as undone thus shown with an empty square symbol
+            options.append(f"□ {nota[1]}") # If instead its state is 1, it is shown with a full square and with strike-through text
         else:
             text = '\u0336'.join(nota[1]) + '\u0336'
             options.append(f"■ {text}")
@@ -114,15 +114,25 @@ def showNotes(): # Displays all the notes available
     if option == "Back": # Adds a final item to the list with the sole purpose of going back to the menu
         mainMenu()
     else:
-        return ids[index] # Returns the DB ID of the selected note for later
+        return ids[index] # Returns the ID of the selected note for later
 
-def exit():
+def exit(): # Exists the program commiting all the changes done to the DB.
     cls()
     dbConnection.commit()
     dbConnection.close()
-    print("Goodbye! Thank you " + YELLOW + "CS50" + RESET + " for everything!" + RED + " <3" + RESET)
-    time.sleep(1)
+    cs50()
     sys.exit()
+
+def cs50():
+    print("Goodbye! Thank you " + YELLOW + "CS50" + RESET + " for everything!" + RED + " <3" + RESET)
+    time.sleep(2)
+    cls()
+    print("Please look forward to my future projects!")
+    time.sleep(2)
+    cls()
+    print("Bye!!")
+    time.sleep(2)
+    cls()
 
 if __name__ == "__main__":
     dbConnection = sqlite3.connect("notes.db", timeout=5) # Connection to the DB
@@ -139,6 +149,5 @@ if __name__ == "__main__":
             mainMenu()
         except KeyboardInterrupt: #Ctrl-C is handled this exception
             cls()
-            print(YELLOW + "Exiting unexpectedly... Please use the main menu next time!" + RESET)
-            dbConnection.commit()
+            exit()
 
