@@ -2,7 +2,6 @@ import sqlite3
 import os
 import sys
 import signal
-import time
 from pick import pick # https://github.com/wong2/pick
 
 # Color palettes for ANSI color coding. Inspired by wordle.c from CS50
