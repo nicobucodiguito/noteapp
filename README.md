@@ -5,6 +5,15 @@
 |         Main Menu          |         Notes Menu          |
 | :--------------------: | :--------------------------: |
 | ![](examples/example2.png) | ![](examples/example1.png) |
+---
+
+### Installation
+---
+- Install the Pick library through "pip install -r requirements.txt" or via a venv (then pip install pick)
+- The rest of dependencies are already bundled within Python's standard library (Python 2.5 and newer)
+- Execute the program and a new database will be created for you to use, that's all! :) 
+
+---
 
 ### Usage
 ---
@@ -19,8 +28,3 @@ The options for existing notes are the following:
 - **Delete this note**: Deletes the note permanently, requires user confirmation.
 ---
 
-### Installation
-
-- Install the Pick library through "pip install -r requirements.txt" or via a venv (then pip install pick)
-- The rest of dependencies are already bundled within Python's standard library (Python 2.5 and newer)
-- Execute the program, a new database will be created for you to use and that's it! :) 
